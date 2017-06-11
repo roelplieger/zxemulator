@@ -20,7 +20,7 @@ public class Z80ServiceImpl implements Z80Service {
 	@Autowired
 	AddressBusService addresBusService;
 	@Autowired
-	KeyboardService keyboardService;
+	KeyboardServiceImpl keyboardService;
 
 	private boolean useClockCycles = true;
 	private int clockCycles;
@@ -265,9 +265,9 @@ public class Z80ServiceImpl implements Z80Service {
 		short PC = registerService.getPC();
 		// System.out.println(String.format("PC - %x", PC));
 
-		if((PC & 0xffff) > 0x8000) {
-			System.out.println(String.format("PC - %x", PC));
-		}
+		// if((PC & 0xffff) > 0x8000) {
+		// System.out.println(String.format("PC - %x", PC));
+		// }
 		// if(PC == 0x0038) {
 		// System.out.println("Interrupt!");
 		// }
@@ -359,21 +359,21 @@ public class Z80ServiceImpl implements Z80Service {
 		// halted = true;
 		// System.out.println("MAIN-1");
 		// }
-		if(PC == 0x028E) {
-			System.out.println("KEY-SCAN");
-		}
-		if(PC == 0x02F1) {
-			System.out.println("K-NEW");
-		}
-		if(PC == 0x02C2) {
-			System.out.println("return from KEY-SCAN");
-		}
-		if(PC == 0x031E) {
-			System.out.println("K-TEST");
-		}
-		if(PC == 0x0308) {
-			System.out.println("K-END");
-		}
+		// if(PC == 0x028E) {
+		// System.out.println("KEY-SCAN");
+		// }
+		// if(PC == 0x02F1) {
+		// System.out.println("K-NEW");
+		// }
+		// if(PC == 0x02C2) {
+		// System.out.println("return from KEY-SCAN");
+		// }
+		// if(PC == 0x031E) {
+		// System.out.println("K-TEST");
+		// }
+		// if(PC == 0x0308) {
+		// System.out.println("K-END");
+		// }
 
 		// and with 0xFF and cast to short to deal with signed byte values
 		short op = (short)(memoryService.readByte(PC) & 0xFF);
@@ -3521,6 +3521,7 @@ public class Z80ServiceImpl implements Z80Service {
 						registerService.set(subOp, byteValue);
 					}
 				} else {
+					subOp >>>= 4;
 					if(subOp == 0x06) {
 						short pointer = 0;
 						switch (mode) {
@@ -3617,6 +3618,7 @@ public class Z80ServiceImpl implements Z80Service {
 						registerService.set(subOp, byteValue);
 					}
 				} else {
+					subOp >>>= 4;
 					if(subOp == 0x06) {
 						short pointer = 0;
 						switch (mode) {
@@ -3713,6 +3715,7 @@ public class Z80ServiceImpl implements Z80Service {
 						registerService.set(subOp, byteValue);
 					}
 				} else {
+					subOp >>>= 4;
 					if(subOp == 0x06) {
 						short pointer = 0;
 						switch (mode) {

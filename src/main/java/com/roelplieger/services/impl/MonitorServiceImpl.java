@@ -2,6 +2,8 @@ package com.roelplieger.services.impl;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JComponent;
@@ -11,11 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.roelplieger.exceptions.MemoryException;
+import com.roelplieger.services.KeyboardService;
 import com.roelplieger.services.MemoryService;
 import com.roelplieger.services.MonitorService;
 
 @Component
-public class MonitorServiceImpl extends JPanel implements MonitorService {
+public class MonitorServiceImpl extends JPanel implements MonitorService, KeyListener {
 
 	/**
 	 * 
@@ -31,9 +34,13 @@ public class MonitorServiceImpl extends JPanel implements MonitorService {
 
 	@Autowired
 	MemoryService memoryService;
+	@Autowired
+	KeyboardService keyboardService;
 
 	public MonitorServiceImpl() {
 		setBounds(0, 0, 256, 192);
+		addKeyListener(this);
+		setFocusable(true);
 	}
 
 	@Override
@@ -112,6 +119,21 @@ public class MonitorServiceImpl extends JPanel implements MonitorService {
 		}
 
 		repaint();
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		keyboardService.keyDown(e.getKeyCode());
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		keyboardService.keyUp(e.getKeyCode());
 	}
 
 }

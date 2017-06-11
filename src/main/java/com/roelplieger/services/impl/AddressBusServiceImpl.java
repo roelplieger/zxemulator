@@ -20,8 +20,8 @@ public class AddressBusServiceImpl implements AddressBusService {
 		if(ioService != null) {
 			return ioService.in(port);
 		}
-		// return 0;
-		throw new PortException(String.format("Port %x not registered", port));
+		return 0;
+		// throw new PortException(String.format("Port %x not registered", port));
 	}
 
 	@Override
