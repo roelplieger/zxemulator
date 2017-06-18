@@ -262,6 +262,8 @@ public class Z80ServiceImpl implements Z80Service {
 	}
 
 	private void startInterrupt() throws MemoryException {
+		halted = false;
+		iff1 = false;
 		push(registerService.getPC());
 		switch (im) {
 			case 1:
@@ -1372,7 +1374,7 @@ public class Z80ServiceImpl implements Z80Service {
 				break;
 
 			case 0x6E:
-				// ld e,(hl)
+				// ld l,(hl)
 				clockCycles = 7;
 				HL = registerService.getHL();
 				byteValue = memoryService.readByte(HL);
@@ -2188,8 +2190,8 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xC6:
 				// add a,*
 				clockCycles = 7;
-				byteValue = memoryService.readByte(PC + 1);
 				A = registerService.getA();
+				byteValue = memoryService.readByte(PC + 1);
 				A = add(A, byteValue);
 				registerService.setA(A);
 				PC += 2;
@@ -2333,8 +2335,8 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xD6:
 				// sub *
 				clockCycles = 7;
-				byteValue = memoryService.readByte(PC + 1);
 				A = registerService.getA();
+				byteValue = memoryService.readByte(PC + 1);
 				A = sub(A, byteValue);
 				registerService.setA(A);
 				PC += 2;
@@ -2498,8 +2500,8 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xE6:
 				// and *
 				clockCycles = 7;
-				byteValue = memoryService.readByte(PC + 1);
 				A = registerService.getA();
+				byteValue = memoryService.readByte(PC + 1);
 				A = and(A, byteValue);
 				registerService.setA(A);
 				PC += 2;
@@ -2644,8 +2646,8 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xF6:
 				// or *
 				clockCycles = 7;
-				byteValue = memoryService.readByte(PC + 1);
 				A = registerService.getA();
+				byteValue = memoryService.readByte(PC + 1);
 				A = or(A, byteValue);
 				registerService.setA(A);
 				PC += 2;
@@ -2802,6 +2804,7 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0x7D:
 				// retn
 				clockCycles = 14;
+				iff1 = iff2;
 				PC = pop();
 				break;
 
@@ -2835,7 +2838,7 @@ public class Z80ServiceImpl implements Z80Service {
 				clockCycles = 12;
 				B = registerService.getB();
 				port = ((B << 8) & 0xffff) + (C & 0xff);
-				addresBusService.out(port, registerService.getC());
+				addresBusService.out(port, C);
 				PC += 2;
 				break;
 
@@ -3020,8 +3023,8 @@ public class Z80ServiceImpl implements Z80Service {
 				HL = registerService.getHL();
 				byte b1 = memoryService.readByte(HL);
 				byte b2 = registerService.getA();
-				byte b3 = (byte)(((b2 & 0xff) << 4) & 0x0F + (b1 & 0xff) >> 4);
-				byte b4 = (byte)((b2 & 0xF0) + (b3 & 0x0F));
+				byte b3 = (byte)(((b2 & 0xff) << 4) + (b1 & 0xff) >>> 4);
+				byte b4 = (byte)((b2 & 0xF0) + (b1 & 0x0F));
 				memoryService.writeByte(HL, b3);
 				registerService.setA(b4);
 				registerService.setSignFlag(b4 < 0);
@@ -3073,8 +3076,8 @@ public class Z80ServiceImpl implements Z80Service {
 				HL = registerService.getHL();
 				b1 = memoryService.readByte(HL);
 				b2 = registerService.getA();
-				b3 = (byte)(((b1 & 0xff) << 4) & 0xF0 + (b2 & 0xff) >> 4);
-				b4 = (byte)((b2 & 0xF0) + (((b1 & 0xff) >> 4) & 0x0F));
+				b3 = (byte)(((b1 & 0xff) << 4) + (b2 & 0xff) >>> 4);
+				b4 = (byte)((b2 & 0xF0) + (((b1 & 0xff) >>> 4) & 0x0F));
 				memoryService.writeByte(HL, b3);
 				registerService.setA(b4);
 				registerService.setSignFlag(b4 < 0);
@@ -3199,15 +3202,14 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xA2:
 				// ini
 				clockCycles = 16;
-				C = registerService.getC();
 				HL = registerService.getHL();
 				B = registerService.getB();
 				port = ((B << 8) & 0xffff) + (C & 0xff);
 				byteValue = addresBusService.in(port);
 				memoryService.writeByte(HL, byteValue);
-				registerService.setHL((short)(HL + 1));
-				registerService.setB((byte)(B - 1));
-				registerService.setZeroFlag(B - 1 == 0);
+				registerService.setHL(++HL);
+				registerService.setB(--B);
+				registerService.setZeroFlag(B == 0);
 				registerService.setAddSubtractFlag(true);
 				PC += 2;
 				break;
@@ -3215,15 +3217,14 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xA3:
 				// outi
 				clockCycles = 16;
-				C = registerService.getC();
 				HL = registerService.getHL();
 				B = registerService.getB();
 				port = ((B << 8) & 0xffff) + (C & 0xff);
 				byteValue = memoryService.readByte(HL);
 				addresBusService.out(port, byteValue);
-				registerService.setHL((short)(HL + 1));
-				registerService.setB((byte)(B - 1));
-				registerService.setZeroFlag(B - 1 == 0);
+				registerService.setHL(++HL);
+				registerService.setB(--B);
+				registerService.setZeroFlag(B == 0);
 				registerService.setAddSubtractFlag(true);
 				PC += 2;
 				break;
@@ -3269,15 +3270,14 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xAA:
 				// ind
 				clockCycles = 16;
-				C = registerService.getC();
 				HL = registerService.getHL();
 				B = registerService.getB();
 				port = ((B << 8) & 0xffff) + (C & 0xff);
 				byteValue = addresBusService.in(port);
 				memoryService.writeByte(HL, byteValue);
-				registerService.setHL((short)(HL - 1));
-				registerService.setB((byte)(B - 1));
-				registerService.setZeroFlag(B - 1 == 0);
+				registerService.setHL(--HL);
+				registerService.setB(--B);
+				registerService.setZeroFlag(B == 0);
 				registerService.setAddSubtractFlag(true);
 				PC += 2;
 				break;
@@ -3285,15 +3285,14 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xAB:
 				// outd
 				clockCycles = 16;
-				C = registerService.getC();
 				HL = registerService.getHL();
 				B = registerService.getB();
 				port = ((B << 8) & 0xffff) + (C & 0xff);
 				byteValue = memoryService.readByte(HL);
 				addresBusService.out(port, byteValue);
-				registerService.setHL((short)(HL - 1));
-				registerService.setB((byte)(B - 1));
-				registerService.setZeroFlag(B - 1 == 0);
+				registerService.setHL(--HL);
+				registerService.setB(--B);
+				registerService.setZeroFlag(B == 0);
 				registerService.setAddSubtractFlag(true);
 				PC += 2;
 				break;
@@ -3328,7 +3327,7 @@ public class Z80ServiceImpl implements Z80Service {
 				HL = registerService.getHL();
 				A = registerService.getA();
 				M = memoryService.readByte(HL);
-				byteValue = (byte)((A & 0xff) - (M & 0xff));
+				byteValue = (byte)(A - M);
 				registerService.setSignFlag(byteValue < 0);
 				registerService.setZeroFlag(byteValue == 0);
 				registerService.setHalfCarryFlag((A & 0xf) - (M & 0xf) < 0);
@@ -3346,15 +3345,14 @@ public class Z80ServiceImpl implements Z80Service {
 
 			case 0xB2:
 				// inir
-				C = registerService.getC();
 				HL = registerService.getHL();
 				B = registerService.getB();
 				port = ((B << 8) & 0xffff) + (C & 0xff);
 				byteValue = addresBusService.in(port);
 				memoryService.writeByte(HL, byteValue);
-				registerService.setHL((short)(HL + 1));
-				registerService.setB((byte)((B & 0xff) - 1));
-				registerService.setZeroFlag((B & 0xff) - 1 == 0);
+				registerService.setHL(++HL);
+				registerService.setB(--B);
+				registerService.setZeroFlag(B == 0);
 				registerService.setAddSubtractFlag(true);
 				if(B == 0) {
 					clockCycles = 16;
@@ -3366,15 +3364,14 @@ public class Z80ServiceImpl implements Z80Service {
 
 			case 0xB3:
 				// otir
-				C = registerService.getC();
 				HL = registerService.getHL();
 				B = registerService.getB();
 				port = ((B << 8) & 0xffff) + (C & 0xff);
 				byteValue = memoryService.readByte(HL);
 				addresBusService.out(port, byteValue);
-				registerService.setHL((short)(HL + 1));
-				registerService.setB((byte)((B & 0xff) - 1));
-				registerService.setZeroFlag((B & 0xff) - 1 == 0);
+				registerService.setHL(++HL);
+				registerService.setB(--B);
+				registerService.setZeroFlag(B == 0);
 				registerService.setAddSubtractFlag(true);
 				if(B == 0) {
 					clockCycles = 16;
@@ -3432,15 +3429,14 @@ public class Z80ServiceImpl implements Z80Service {
 
 			case 0xBA:
 				// indr
-				C = registerService.getC();
 				HL = registerService.getHL();
 				B = registerService.getB();
 				port = ((B << 8) & 0xffff) + (C & 0xff);
 				byteValue = addresBusService.in(port);
 				memoryService.writeByte(HL, byteValue);
-				registerService.setHL((short)(HL - 1));
-				registerService.setB((byte)(B - 1));
-				registerService.setZeroFlag(B - 1 == 0);
+				registerService.setHL(--HL);
+				registerService.setB(--B);
+				registerService.setZeroFlag(B == 0);
 				registerService.setAddSubtractFlag(true);
 				if(B == 0) {
 					clockCycles = 16;
@@ -3452,15 +3448,14 @@ public class Z80ServiceImpl implements Z80Service {
 
 			case 0xBB:
 				// otdr
-				C = registerService.getC();
 				HL = registerService.getHL();
 				B = registerService.getB();
 				port = ((B << 8) & 0xffff) + (C & 0xff);
 				byteValue = memoryService.readByte(HL);
 				addresBusService.out(port, byteValue);
-				registerService.setHL((short)(HL - 1));
-				registerService.setB((byte)(B - 1));
-				registerService.setZeroFlag(B - 1 == 0);
+				registerService.setHL(--HL);
+				registerService.setB(--B);
+				registerService.setZeroFlag(B == 0);
 				registerService.setAddSubtractFlag(true);
 				if(B == 0) {
 					clockCycles = 16;
@@ -4394,7 +4389,7 @@ public class Z80ServiceImpl implements Z80Service {
 				pointer = (short)(getIXIY(mode) + byteValue);
 				byteValue = memoryService.readByte(pointer);
 				A = registerService.getA();
-				sub(A, byteValue);
+				cp(A, byteValue);
 				PC += 3;
 				break;
 
@@ -4407,11 +4402,12 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xE1:
 				// pop ix / pop iy
 				clockCycles = 14;
-				SP = registerService.getSP();
-				byte L = memoryService.readByte(SP++);
-				byte H = memoryService.readByte(SP++);
-				registerService.setSP(SP);
-				setIXIY(mode, (short)(H << 8 + L));
+				// SP = registerService.getSP();
+				// byte L = memoryService.readByte(SP++);
+				// byte H = memoryService.readByte(SP++);
+				// registerService.setSP(SP);
+				// setIXIY(mode, (short)(H << 8 + L));
+				setIXIY(mode, pop());
 				PC += 2;
 				break;
 
@@ -4419,8 +4415,8 @@ public class Z80ServiceImpl implements Z80Service {
 				// ex (sp),ix / ex (sp),iy
 				clockCycles = 23;
 				SP = registerService.getSP();
-				L = memoryService.readByte(SP);
-				H = memoryService.readByte(SP + 1);
+				byte L = memoryService.readByte(SP);
+				byte H = memoryService.readByte(SP + 1);
 				value = getIXIY(mode);
 				memoryService.writeByte(SP, (byte)(value & 0xff));
 				memoryService.writeByte(SP + 1, (byte)(value >> 8));
@@ -4431,10 +4427,11 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xE5:
 				// push ix / push iy
 				clockCycles = 15;
-				SP = registerService.getSP();
-				value = getIXIY(mode);
-				memoryService.writeByte(--SP, (byte)(value >> 8));
-				memoryService.writeByte(--SP, (byte)(value & 0xff));
+				// SP = registerService.getSP();
+				// value = getIXIY(mode);
+				// memoryService.writeByte(--SP, (byte)(value >> 8));
+				// memoryService.writeByte(--SP, (byte)(value & 0xff));
+				push(getIXIY(mode));
 				PC += 2;
 				break;
 
