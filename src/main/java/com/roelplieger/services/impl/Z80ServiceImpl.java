@@ -3546,7 +3546,7 @@ public class Z80ServiceImpl implements Z80Service {
 						registerService.set(subOp, byteValue);
 					}
 				} else {
-					subOp >>>= 4;
+					subOp -= 8;
 					if(subOp == 0x06) {
 						short pointer = 0;
 						switch (mode) {
@@ -3643,7 +3643,7 @@ public class Z80ServiceImpl implements Z80Service {
 						registerService.set(subOp, byteValue);
 					}
 				} else {
-					subOp >>>= 4;
+					subOp -= 8;
 					if(subOp == 0x06) {
 						short pointer = 0;
 						switch (mode) {
@@ -3740,7 +3740,7 @@ public class Z80ServiceImpl implements Z80Service {
 						registerService.set(subOp, byteValue);
 					}
 				} else {
-					subOp >>>= 4;
+					subOp -= 8;
 					if(subOp == 0x06) {
 						short pointer = 0;
 						switch (mode) {
