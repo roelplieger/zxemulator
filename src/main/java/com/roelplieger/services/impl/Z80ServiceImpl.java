@@ -33,6 +33,7 @@ public class Z80ServiceImpl implements Z80Service {
 	private boolean execInterrupt = false;
 	private boolean interruptRunning = false;
 	private boolean debug = false;
+	private short breakPoint = 0;
 
 	private boolean nextClockCycle() {
 		if(useClockCycles && clockCycles > 1) {
@@ -45,17 +46,12 @@ public class Z80ServiceImpl implements Z80Service {
 	}
 
 	private boolean getParity(byte x) {
-		int count = 0;
-
-		for(int i = 0; i < 8; i++) {
-			// check most right bit
-			if((x & 1) != 0) {
-				count++;
-			}
-			x = (byte)((x >>> 1) & 0xff);
-		}
-
-		return (count % 2) != 0;
+		// see https://stackoverflow.com/questions/17350906/computing-the-parity
+		int y;
+		y = x ^ (x >> 1);
+		y = y ^ (y >> 2);
+		y = y ^ (y >> 4);
+		return (y & 1) == 0;
 	}
 
 	private int getAbsolutePointer(int pointer) {
@@ -95,10 +91,8 @@ public class Z80ServiceImpl implements Z80Service {
 
 	private boolean checkByteOverflow(byte x, byte y, int result) {
 		// see http://teaching.idallen.com/dat2343/10f/notes/040_overflow.txt
-		if((byte)((x & 0x80) ^ (y & 0x80)) != 0) {
-			if((byte)((x & 0x80) ^ (result & 0x80)) != 0 || (byte)((y & 0x80) ^ (result & 0x80)) != 0) {
-				return true;
-			}
+		if(((x & 0x80) ^ (y & 0x80)) == 0) {
+			return (x & 0x80) != (result & 0x80);
 		}
 
 		return false;
@@ -106,10 +100,8 @@ public class Z80ServiceImpl implements Z80Service {
 
 	private boolean checkShortOverflow(short x, short y, int result) {
 		// see http://teaching.idallen.com/dat2343/10f/notes/040_overflow.txt
-		if((short)((x & 0x8000) ^ (y & 0x8000)) != 0) {
-			if((short)((x & 0x8000) ^ (result & 0x8000)) != 0 || (short)((y & 0x8000) ^ (result & 0x8000)) != 0) {
-				return true;
-			}
+		if(((x & 0x8000) ^ (y & 0x8000)) == 0) {
+			return (x & 0x8000) != (result & 0x8000);
 		}
 
 		return false;
