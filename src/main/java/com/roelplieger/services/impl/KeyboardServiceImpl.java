@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
 
@@ -15,7 +16,7 @@ import com.roelplieger.services.KeyboardService;
 public class KeyboardServiceImpl implements KeyboardService, IOService {
 
 	private final Set<Integer> keysPressed = new HashSet<>();
-	private final Map<Integer, Map<Integer, Byte>> portKeyMap = new HashMap<>();
+	private final Map<Integer, Map<Integer, Byte>> portKeyMap = new ConcurrentHashMap<Integer, Map<Integer, Byte>>();
 
 	public KeyboardServiceImpl() {
 		// init key maps
