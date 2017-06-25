@@ -1,5 +1,8 @@
 package com.roelplieger.services.impl;
 
+import java.io.FileWriter;
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +37,15 @@ public class Z80ServiceImpl implements Z80Service {
 	private boolean interruptRunning = false;
 	private boolean debug = false;
 	private short breakPoint = 0;
+	private FileWriter fw;
+
+	public Z80ServiceImpl() {
+		try {
+			fw = new FileWriter("/tmp/z80.log");
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	private boolean nextClockCycle() {
 		if(useClockCycles && clockCycles > 1) {
@@ -263,6 +275,7 @@ public class Z80ServiceImpl implements Z80Service {
 
 	private synchronized void doStep() throws MemoryException, PortException {
 		short PC = registerService.getPC();
+		logPC(PC);
 		// System.out.println(String.format("PC - %x", PC));
 
 		// if((PC & 0xffff) > 0x8000) {
@@ -2734,6 +2747,14 @@ public class Z80ServiceImpl implements Z80Service {
 
 		}
 		registerService.setPC(PC);
+	}
+
+	private void logPC(short pc) {
+		try {
+			fw.write(Short.toString(pc) + "\n");
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private short doExtd(short PC) throws MemoryException, PortException {
