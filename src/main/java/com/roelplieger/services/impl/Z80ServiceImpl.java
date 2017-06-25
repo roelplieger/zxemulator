@@ -108,50 +108,82 @@ public class Z80ServiceImpl implements Z80Service {
 	}
 
 	private byte add(byte x, byte y) {
-		byte result = (byte)(x + y);
-		registerService.setCarryFlag(((x + y) & 0x100) != 0);
-		registerService.setZeroFlag(result == 0);
-		registerService.setParityOverflowFlag(checkByteOverflow(x, y, result));
+		int result = x + y;
 		registerService.setSignFlag(result < 0);
+		registerService.setZeroFlag(result == 0);
+		registerService.setHalfCarryFlag(((x & 0xf) + (y & 0xf) & 0x10) != 0);
+		registerService.setParityOverflowFlag(checkByteOverflow(x, y, result));
 		registerService.setAddSubtractFlag(false);
-		registerService.setHalfCarryFlag((((x & 0xf) + (y & 0xf)) & 0x10) != 0);
-		return result;
+		registerService.setCarryFlag((result & 0x100) != 0);
+		return (byte)(result & 0xff);
 	}
 
 	private byte adc(byte x, byte y) {
 		boolean CFlag = registerService.getCarryFlag();
-		byte result = (byte)(x + y + (CFlag ? 1 : 0));
-		registerService.setCarryFlag(((x + y + (CFlag ? 1 : 0)) & 0x100) != 0);
-		registerService.setZeroFlag(result == 0);
-		registerService.setParityOverflowFlag(checkByteOverflow(x, y, result));
+		int result = x + y + (CFlag ? 1 : 0);
 		registerService.setSignFlag(result < 0);
-		registerService.setAddSubtractFlag(false);
+		registerService.setZeroFlag(result == 0);
 		registerService.setHalfCarryFlag((((x & 0xf) + (y & 0xf) + (CFlag ? 1 : 0)) & 0x10) != 0);
-		return result;
+		registerService.setParityOverflowFlag(checkByteOverflow(x, y, result));
+		registerService.setAddSubtractFlag(false);
+		registerService.setCarryFlag((result & 0x100) != 0);
+		return (byte)(result & 0xff);
 	}
 
 	private byte sub(byte x, byte y) {
-		byte result = (byte)(x - y);
-		registerService.setCarryFlag(x < y);
-		registerService.setZeroFlag(result == 0);
-		registerService.setParityOverflowFlag(checkByteOverflow(x, y, result));
+		int result = x - y;
 		registerService.setSignFlag(result < 0);
+		registerService.setZeroFlag(result == 0);
+		registerService.setHalfCarryFlag(((x & 0xf) - (y & 0xf)) < 0);
+		registerService.setParityOverflowFlag(checkByteOverflow(x, y, result));
 		registerService.setAddSubtractFlag(true);
-		registerService.setHalfCarryFlag(false);
-
-		return result;
+		registerService.setCarryFlag(result < 0);
+		return (byte)(result & 0xff);
 	}
 
 	private byte sbc(byte x, byte y) {
 		boolean CFlag = registerService.getCarryFlag();
-		byte result = (byte)(x - y - (CFlag ? 1 : 0));
-		registerService.setCarryFlag(x < (y + (CFlag ? 1 : 0)));
+		int result = x - y - (CFlag ? 1 : 0);
 		registerService.setZeroFlag(result == 0);
-		registerService.setParityOverflowFlag(checkByteOverflow(x, y, result));
 		registerService.setSignFlag(result < 0);
-		registerService.setAddSubtractFlag(true);
 		registerService.setHalfCarryFlag((x & 0xf) - (y & 0xf) - (CFlag ? 1 : 0) < 0);
-		return result;
+		registerService.setParityOverflowFlag(checkByteOverflow(x, y, result));
+		registerService.setAddSubtractFlag(true);
+		registerService.setCarryFlag(result < 0);
+		return (byte)(result & 0xff);
+	}
+
+	private byte and(byte x, byte y) {
+		int result = (x & 0xff) & (y & 0xff);
+		registerService.setZeroFlag(result == 0);
+		registerService.setAddSubtractFlag(false);
+		registerService.setSignFlag(result < 0);
+		registerService.setParityOverflowFlag(getParity((byte)result));
+		registerService.setHalfCarryFlag(true);
+		registerService.setCarryFlag(false);
+		return (byte)(result & 0xff);
+	}
+
+	private byte xor(byte x, byte y) {
+		int result = (x & 0xff) ^ (y & 0xff);
+		registerService.setZeroFlag(result == 0);
+		registerService.setAddSubtractFlag(false);
+		registerService.setSignFlag(result < 0);
+		registerService.setParityOverflowFlag(getParity((byte)result));
+		registerService.setHalfCarryFlag(false);
+		registerService.setCarryFlag(false);
+		return (byte)(result & 0xff);
+	}
+
+	private byte or(byte x, byte y) {
+		int result = (x & 0xff) | (y & 0xff);
+		registerService.setZeroFlag(result == 0);
+		registerService.setAddSubtractFlag(false);
+		registerService.setSignFlag(result < 0);
+		registerService.setParityOverflowFlag(getParity((byte)result));
+		registerService.setHalfCarryFlag(false);
+		registerService.setCarryFlag(false);
+		return (byte)(result & 0xff);
 	}
 
 	private short add(short x, short y) {
@@ -190,39 +222,6 @@ public class Z80ServiceImpl implements Z80Service {
 		registerService.setAddSubtractFlag(true);
 		registerService.setHalfCarryFlag(((x & 0xf00) - (y & 0xf00) - (CFlag ? 1 : 0)) < 0);
 		return (short)(result & 0xffff);
-	}
-
-	private byte and(byte x, byte y) {
-		byte result = (byte)(x & y);
-		registerService.setCarryFlag(false);
-		registerService.setZeroFlag(result == 0);
-		registerService.setParityOverflowFlag(getParity(result));
-		registerService.setSignFlag(result < 0);
-		registerService.setAddSubtractFlag(false);
-		registerService.setHalfCarryFlag(true);
-		return result;
-	}
-
-	private byte xor(byte x, byte y) {
-		byte result = (byte)(x ^ y);
-		registerService.setCarryFlag(false);
-		registerService.setZeroFlag(result == 0);
-		registerService.setParityOverflowFlag(getParity(result));
-		registerService.setSignFlag(result < 0);
-		registerService.setAddSubtractFlag(false);
-		registerService.setHalfCarryFlag(false);
-		return result;
-	}
-
-	private byte or(byte x, byte y) {
-		byte result = (byte)(x | y);
-		registerService.setCarryFlag(false);
-		registerService.setZeroFlag(result == 0);
-		registerService.setParityOverflowFlag(getParity(result));
-		registerService.setSignFlag(result < 0);
-		registerService.setAddSubtractFlag(false);
-		registerService.setHalfCarryFlag(false);
-		return result;
 	}
 
 	private void cp(byte x, byte y) {
