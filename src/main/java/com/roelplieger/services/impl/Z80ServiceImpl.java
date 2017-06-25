@@ -2751,7 +2751,7 @@ public class Z80ServiceImpl implements Z80Service {
 
 	private void logPC(short pc) {
 		try {
-			fw.write(Short.toString(pc) + "\n");
+			fw.write(String.format("%x\n", pc));
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
