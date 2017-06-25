@@ -155,35 +155,41 @@ public class Z80ServiceImpl implements Z80Service {
 	}
 
 	private short add(short x, short y) {
-		short result = (short)(x + y);
-		registerService.setCarryFlag(((x + y) & 0x10000) != 0);
+		int absX = x & 0xffff;
+		int absY = y & 0xffff;
+		int result = absX + absY;
+		registerService.setCarryFlag((result & 0x10000) != 0);
 		registerService.setAddSubtractFlag(false);
 		registerService.setHalfCarryFlag((((x & 0xf00) + (y & 0xf00)) & 0x1000) != 0);
-		return result;
+		return (short)(result & 0xffff);
 	}
 
 	private short adc(short x, short y) {
 		boolean CFlag = registerService.getCarryFlag();
-		short result = (short)(x + y + (CFlag ? 1 : 0));
-		registerService.setCarryFlag(((x + y + (CFlag ? 1 : 0)) & 0x10000) != 0);
+		int absX = x & 0xffff;
+		int absY = y & 0xffff;
+		int result = absX + absY + (CFlag ? 1 : 0);
+		registerService.setCarryFlag((result & 0x10000) != 0);
 		registerService.setZeroFlag(result == 0);
-		registerService.setParityOverflowFlag(checkShortOverflow(x, y, result));
+		registerService.setParityOverflowFlag(checkShortOverflow(x, (short)(y + (CFlag ? 1 : 0)), result));
 		registerService.setSignFlag((short)(result & 0xffff) < 0);
 		registerService.setAddSubtractFlag(false);
 		registerService.setHalfCarryFlag((((x & 0xf00) + (y & 0xf00) + (CFlag ? 1 : 0)) & 0x1000) != 0);
-		return result;
+		return (short)(result & 0xffff);
 	}
 
 	private short sbc(short x, short y) {
 		boolean CFlag = registerService.getCarryFlag();
-		short result = (short)(x - y - (CFlag ? 1 : 0));
-		registerService.setCarryFlag(x < (y + (CFlag ? 1 : 0)));
+		int absX = x & 0xffff;
+		int absY = y & 0xffff;
+		int result = absX - absY - (CFlag ? 1 : 0);
+		registerService.setCarryFlag(result < 0);
 		registerService.setZeroFlag(result == 0);
-		registerService.setParityOverflowFlag(checkShortOverflow(x, y, result));
-		registerService.setSignFlag(result < 0);
+		registerService.setParityOverflowFlag(checkShortOverflow(x, (short)(y + (CFlag ? 1 : 0)), result));
+		registerService.setSignFlag((short)(result & 0xffff) < 0);
 		registerService.setAddSubtractFlag(true);
 		registerService.setHalfCarryFlag(((x & 0xf00) - (y & 0xf00) - (CFlag ? 1 : 0)) < 0);
-		return result;
+		return (short)(result & 0xffff);
 	}
 
 	private byte and(byte x, byte y) {
