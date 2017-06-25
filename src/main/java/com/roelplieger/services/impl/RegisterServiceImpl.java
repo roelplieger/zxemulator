@@ -413,7 +413,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getSignFlag() {
-		return (AF & BIT7) != 0;
+		return (getF() & BIT7) != 0;
 	}
 
 	@Override
@@ -427,7 +427,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getZeroFlag() {
-		return (AF & BIT6) != 0;
+		return (getF() & BIT6) != 0;
 	}
 
 	@Override
@@ -453,7 +453,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getHalfCarryFlag() {
-		return (AF & BIT4) != 0;
+		return (getF() & BIT4) != 0;
 	}
 
 	@Override
@@ -467,7 +467,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getParityOverflowFlag() {
-		return (AF & BIT2) != 0;
+		return (getF() & BIT2) != 0;
 	}
 
 	@Override
@@ -481,7 +481,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getAddSubtractFlag() {
-		return (AF & BIT1) != 0;
+		return (getF() & BIT1) != 0;
 	}
 
 	@Override
@@ -495,7 +495,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getCarryFlag() {
-		return (AF & BIT0) != 0;
+		return (getF() & BIT0) != 0;
 	}
 
 	@Override
@@ -509,7 +509,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getSignFlag2() {
-		return (AF2 & BIT7) != 0;
+		return (getF2() & BIT7) != 0;
 	}
 
 	@Override
@@ -535,7 +535,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getZeroFlag2() {
-		return (AF2 & BIT6) != 0;
+		return (getF2() & BIT6) != 0;
 	}
 
 	@Override
@@ -549,7 +549,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getHalfCarryFlag2() {
-		return (AF2 & BIT4) != 0;
+		return (getF2() & BIT4) != 0;
 	}
 
 	@Override
@@ -563,7 +563,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getParityOverflowFlag2() {
-		return (AF2 & BIT2) != 0;
+		return (getF2() & BIT2) != 0;
 	}
 
 	@Override
@@ -577,7 +577,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getAddSubtractFlag2() {
-		return (AF2 & BIT1) != 0;
+		return (getF2() & BIT1) != 0;
 	}
 
 	@Override
@@ -591,7 +591,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getCarryFlag2() {
-		return (AF2 & BIT0) != 0;
+		return (getF2() & BIT0) != 0;
 	}
 
 	@Override
