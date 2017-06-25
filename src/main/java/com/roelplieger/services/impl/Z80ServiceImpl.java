@@ -124,7 +124,7 @@ public class Z80ServiceImpl implements Z80Service {
 		registerService.setSignFlag(result < 0);
 		registerService.setZeroFlag(result == 0);
 		registerService.setHalfCarryFlag((((x & 0xf) + (y & 0xf) + (CFlag ? 1 : 0)) & 0x10) != 0);
-		registerService.setParityOverflowFlag(checkByteOverflow(x, y, result));
+		registerService.setParityOverflowFlag(checkByteOverflow(x, (byte)(y + (CFlag ? 1 : 0)), result));
 		registerService.setAddSubtractFlag(false);
 		registerService.setCarryFlag((result & 0x100) != 0);
 		return (byte)(result & 0xff);
@@ -147,7 +147,7 @@ public class Z80ServiceImpl implements Z80Service {
 		registerService.setZeroFlag(result == 0);
 		registerService.setSignFlag(result < 0);
 		registerService.setHalfCarryFlag((x & 0xf) - (y & 0xf) - (CFlag ? 1 : 0) < 0);
-		registerService.setParityOverflowFlag(checkByteOverflow(x, y, result));
+		registerService.setParityOverflowFlag(checkByteOverflow(x, (byte)(y - (CFlag ? 1 : 0)), result));
 		registerService.setAddSubtractFlag(true);
 		registerService.setCarryFlag(result < 0);
 		return (byte)(result & 0xff);
@@ -167,7 +167,7 @@ public class Z80ServiceImpl implements Z80Service {
 		registerService.setSignFlag(result < 0);
 		registerService.setZeroFlag(result == 0);
 		registerService.setHalfCarryFlag((((x & 0xfff) + (y & 0xfff) + (CFlag ? 1 : 0)) & 0x1000) != 0);
-		registerService.setParityOverflowFlag(checkShortOverflow(x, y, result));
+		registerService.setParityOverflowFlag(checkShortOverflow((short)(x & 0xffff), (short)((y & 0xffff) + (CFlag ? 1 : 0)), result));
 		registerService.setAddSubtractFlag(false);
 		registerService.setCarryFlag((result & 0x10000) != 0);
 		return (short)(result & 0xffff);
@@ -179,7 +179,7 @@ public class Z80ServiceImpl implements Z80Service {
 		registerService.setSignFlag(result < 0);
 		registerService.setZeroFlag(result == 0);
 		registerService.setHalfCarryFlag(((x & 0xfff) - (y & 0xfff) - (CFlag ? 1 : 0)) < 0);
-		registerService.setParityOverflowFlag(checkShortOverflow(x, y, result));
+		registerService.setParityOverflowFlag(checkShortOverflow((short)(x & 0xffff), (short)((y & 0xffff) - (CFlag ? 1 : 0)), result));
 		registerService.setAddSubtractFlag(true);
 		registerService.setCarryFlag(result < 0);
 		return (short)(result & 0xffff);
@@ -397,6 +397,10 @@ public class Z80ServiceImpl implements Z80Service {
 
 		// and with 0xFF and cast to short to deal with signed byte values
 		short op = (short)(memoryService.readByte(PC) & 0xFF);
+
+		if(debug && PC == breakPoint) {
+			debug = true;
+		}
 
 		if(debug && !interruptRunning) {
 			debug = true;
@@ -2192,7 +2196,7 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xC7:
 				// rst 00h
 				clockCycles = 11;
-				push((short)(registerService.getPC() + 1));
+				push((short)(PC + 1));
 				PC = 0x00;
 				break;
 
@@ -2262,7 +2266,7 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xCF:
 				// rst 08h
 				clockCycles = 11;
-				push((short)(registerService.getPC() + 1));
+				push((short)(PC + 1));
 				PC = 0x08;
 				break;
 
@@ -2337,7 +2341,7 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xD7:
 				// rst 10h
 				clockCycles = 11;
-				push((short)(registerService.getPC() + 1));
+				push((short)(PC + 1));
 				PC = 0x10;
 				break;
 
@@ -2421,7 +2425,7 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xDF:
 				// rst 18h
 				clockCycles = 11;
-				push((short)(registerService.getPC() + 1));
+				push((short)(PC + 1));
 				PC = 0x18;
 				break;
 
@@ -2502,7 +2506,7 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xE7:
 				// rst 20h
 				clockCycles = 11;
-				push((short)(registerService.getPC() + 1));
+				push((short)(PC + 1));
 				PC = 0x20;
 				break;
 
@@ -2574,7 +2578,7 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xEF:
 				// rst 28h
 				clockCycles = 11;
-				push((short)(registerService.getPC() + 1));
+				push((short)(PC + 1));
 				PC = 0x28;
 				break;
 
@@ -2648,7 +2652,7 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xF7:
 				// rst 30h
 				clockCycles = 11;
-				push((short)(registerService.getPC() + 1));
+				push((short)(PC + 1));
 				PC = 0x30;
 				break;
 
@@ -2721,7 +2725,7 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xFF:
 				// rst 38h
 				clockCycles = 11;
-				push((short)(registerService.getPC() + 1));
+				push((short)(PC + 1));
 				PC = 0x38;
 				break;
 
