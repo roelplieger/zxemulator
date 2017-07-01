@@ -38,16 +38,16 @@ public class RegisterServiceImpl implements RegisterService {
 
 	private short setHighRegister(short register, byte value) {
 		// replace high byte of register with value
-		return (short)((register & 0xFF) + (short)(value << 8));
+		return (short)(((register & 0xff) + (value << 8)) & 0xffff);
 	}
 
 	private byte getLowRegister(short register) {
-		return (byte)(register & 0xFF);
+		return (byte)(register & 0xff);
 	}
 
 	private short setLowRegister(short register, byte value) {
 		// replace lower byte of register with unsigned value
-		return (short)((register & 0xFF00) + (value & 0xFF));
+		return (short)(((register & 0xff00) + (value & 0xff)) & 0xffff);
 	}
 
 	@Override
@@ -347,6 +347,9 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public void setPC(short value) {
+		if(value >= 0x4000) {
+			System.out.println("PC >= 0x4000");
+		}
 		PC = value;
 	}
 
