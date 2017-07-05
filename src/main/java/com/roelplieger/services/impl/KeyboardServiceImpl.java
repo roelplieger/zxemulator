@@ -98,7 +98,7 @@ public class KeyboardServiceImpl implements KeyboardService, IOService {
 		}
 
 		if(keys != 0x00) {
-			System.out.println(String.format("%x - %x", port, (byte)(0x1f - keys)));
+			// System.out.println(String.format("%x - %x", port, (byte)(0x1f - keys)));
 			return (byte)(0x1f - keys);
 		}
 		return (byte)0xFF;

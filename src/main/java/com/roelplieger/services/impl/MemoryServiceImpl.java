@@ -42,8 +42,9 @@ public class MemoryServiceImpl implements MemoryService {
 		checkPointerOutOfRange(pointer);
 		if(pointer < 0x4000) {
 			System.out.println("cannot write into ROM!");
+		} else {
+			memory[pointer] = value;
 		}
-		memory[pointer] = value;
 	}
 
 	private void checkPointerOutOfRange(int pointer) throws MemoryException {
@@ -65,9 +66,10 @@ public class MemoryServiceImpl implements MemoryService {
 		checkPointerOutOfRange(pointer + 1);
 		if(pointer < 0x4000) {
 			System.out.println("cannot write into ROM!");
+		} else {
+			memory[pointer + 1] = (byte)((value >>> 8) & 0xff);
+			memory[pointer] = (byte)(value & 0xff);
 		}
-		memory[pointer + 1] = (byte)((value >>> 8) & 0xff);
-		memory[pointer] = (byte)(value & 0xff);
 	}
 
 	@Override
