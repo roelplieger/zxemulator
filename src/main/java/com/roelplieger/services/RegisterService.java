@@ -216,4 +216,6 @@ public interface RegisterService {
 	boolean getCarryFlag2();
 
 	void setCarryFlag2(boolean value);
+
+	boolean getParity(byte value);
 }

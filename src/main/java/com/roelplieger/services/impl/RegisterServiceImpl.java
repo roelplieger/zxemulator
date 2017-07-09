@@ -15,6 +15,7 @@ public class RegisterServiceImpl implements RegisterService {
 	private static final byte BIT6 = (byte)0b01000000;
 	private static final byte BIT7 = (byte)0b10000000;
 
+	private boolean[] parityLookupTable = new boolean[256];
 	private short AF;
 	private short BC;
 	private short DE;
@@ -31,6 +32,19 @@ public class RegisterServiceImpl implements RegisterService {
 	private short PC;
 	private byte I;
 	private byte R;
+
+	public RegisterServiceImpl() {
+		buildParityLookupTable();
+	}
+
+	private void buildParityLookupTable() {
+		for(int x = 0; x < 256; x++) {
+			int t = x;
+			t ^= t >> 4;
+			t &= 0x0f;
+			parityLookupTable[x] = (((0x6996 >> t) & 1) == 0);
+		}
+	}
 
 	private byte getHighRegister(short register) {
 		return (byte)(register >>> 8);
@@ -709,6 +723,15 @@ public class RegisterServiceImpl implements RegisterService {
 			default:
 				throw new MemoryException("Invalid register index: " + register);
 		}
+	}
+
+	@Override
+	public boolean getParity(byte value) {
+		int idx = value;
+		if(idx < 0) {
+			idx += 256;
+		}
+		return parityLookupTable[idx];
 	}
 
 }
