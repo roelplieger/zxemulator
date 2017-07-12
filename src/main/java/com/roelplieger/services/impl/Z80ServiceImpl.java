@@ -2413,8 +2413,7 @@ public class Z80ServiceImpl implements Z80Service {
 				// jp nc,**
 				clockCycles = 10;
 				if(!registerService.getCarryFlag()) {
-					pointer = memoryService.readShort(PC + 1);
-					PC = pointer;
+					PC = memoryService.readShort(PC + 1);
 				} else {
 					PC += 3;
 				}
@@ -2795,8 +2794,7 @@ public class Z80ServiceImpl implements Z80Service {
 				// jp m,**
 				clockCycles = 10;
 				if(registerService.getSignFlag()) {
-					pointer = memoryService.readShort(PC + 1);
-					PC = pointer;
+					PC = memoryService.readShort(PC + 1);
 				} else {
 					PC += 3;
 				}
