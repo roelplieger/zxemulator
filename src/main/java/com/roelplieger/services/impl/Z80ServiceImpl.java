@@ -488,20 +488,20 @@ public class Z80ServiceImpl implements Z80Service {
 		// if(PC == 0x0f3b) {
 		// System.out.println("0x0f3b");
 		// }
-		// if(PC == 0x1024) {
-		// System.out.println("enter");
-		// debug = true;
-		// }
+		if(PC == 0x1024) {
+			System.out.println("enter");
+			debug = true;
+		}
 		// if(PC == 0x335e) {
 		// System.out.println("break");
 		// }
 		// if(PC == 0x336c) {
 		// System.out.println("0x336c");
 		// }
-		if(PC == 0x8000) {
-			System.out.println("0x8000");
-			debug = true;
-		}
+		// if(PC == 0x8000) {
+		// System.out.println("0x8000");
+		// debug = true;
+		// }
 
 		// and with 0xFF and cast to short to deal with signed byte values
 		short op = (short)(memoryService.readByte(PC) & 0xFF);
@@ -1040,9 +1040,6 @@ public class Z80ServiceImpl implements Z80Service {
 				// ld (hl),*
 				clockCycles = 10;
 				HL = registerService.getHL();
-				if(HL >= 0 && HL < 0x4000) {
-					System.out.println("stop");
-				}
 				byteValue = memoryService.readByte(PC + 1);
 				memoryService.writeByte(HL, byteValue);
 				PC += 2;
@@ -2395,12 +2392,12 @@ public class Z80ServiceImpl implements Z80Service {
 
 			case 0xD0:
 				// ret nc
-				if(registerService.getCarryFlag()) {
-					clockCycles = 5;
-					PC++;
-				} else {
+				if(!registerService.getCarryFlag()) {
 					clockCycles = 11;
 					PC = pop();
+				} else {
+					clockCycles = 5;
+					PC++;
 				}
 				break;
 
@@ -2415,11 +2412,11 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xD2:
 				// jp nc,**
 				clockCycles = 10;
-				if(registerService.getCarryFlag()) {
-					PC += 3;
-				} else {
+				if(!registerService.getCarryFlag()) {
 					pointer = memoryService.readShort(PC + 1);
 					PC = pointer;
+				} else {
+					PC += 3;
 				}
 				break;
 
@@ -2434,13 +2431,13 @@ public class Z80ServiceImpl implements Z80Service {
 
 			case 0xD4:
 				// call nc,**
-				if(registerService.getCarryFlag()) {
-					clockCycles = 10;
-					PC += 3;
-				} else {
+				if(!registerService.getCarryFlag()) {
 					clockCycles = 17;
 					push((short)(PC + 3));
 					PC = memoryService.readShort(PC + 1);
+				} else {
+					clockCycles = 10;
+					PC += 3;
 				}
 				break;
 
@@ -2494,15 +2491,14 @@ public class Z80ServiceImpl implements Z80Service {
 				registerService.setBC2(BC);
 				registerService.setDE2(DE);
 				registerService.setHL2(HL);
-				PC += 1;
+				PC++;
 				break;
 
 			case 0xDA:
 				// jp c,**
 				clockCycles = 10;
 				if(registerService.getCarryFlag()) {
-					pointer = memoryService.readShort(PC + 1);
-					PC = pointer;
+					PC = memoryService.readShort(PC + 1);
 				} else {
 					PC += 3;
 				}
@@ -2554,12 +2550,12 @@ public class Z80ServiceImpl implements Z80Service {
 
 			case 0xE0:
 				// ret po
-				if(registerService.getParityOverflowFlag()) {
-					clockCycles = 5;
-					PC++;
-				} else {
+				if(!registerService.getParityOverflowFlag()) {
 					clockCycles = 11;
 					PC = pop();
+				} else {
+					clockCycles = 5;
+					PC++;
 				}
 				break;
 
@@ -2574,11 +2570,10 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xE2:
 				// jp po,**
 				clockCycles = 10;
-				if(registerService.getParityOverflowFlag()) {
-					PC += 3;
+				if(!registerService.getParityOverflowFlag()) {
+					PC = memoryService.readShort(PC + 1);
 				} else {
-					pointer = memoryService.readShort(PC + 1);
-					PC = pointer;
+					PC += 3;
 				}
 				break;
 
@@ -2599,13 +2594,13 @@ public class Z80ServiceImpl implements Z80Service {
 
 			case 0xE4:
 				// call po,**
-				if(registerService.getParityOverflowFlag()) {
-					clockCycles = 10;
-					PC += 3;
-				} else {
+				if(!registerService.getParityOverflowFlag()) {
 					clockCycles = 17;
 					push((short)(PC + 3));
 					PC = memoryService.readShort(PC + 1);
+				} else {
+					clockCycles = 10;
+					PC += 3;
 				}
 				break;
 
@@ -2654,8 +2649,7 @@ public class Z80ServiceImpl implements Z80Service {
 				// jp pe,**
 				clockCycles = 10;
 				if(registerService.getParityOverflowFlag()) {
-					pointer = memoryService.readShort(PC + 1);
-					PC = pointer;
+					PC = memoryService.readShort(PC + 1);
 				} else {
 					PC += 3;
 				}
@@ -2707,12 +2701,12 @@ public class Z80ServiceImpl implements Z80Service {
 
 			case 0xF0:
 				// ret p
-				if(registerService.getSignFlag()) {
-					clockCycles = 5;
-					PC++;
-				} else {
+				if(!registerService.getSignFlag()) {
 					clockCycles = 11;
 					PC = pop();
+				} else {
+					clockCycles = 5;
+					PC++;
 				}
 				break;
 
@@ -2727,11 +2721,10 @@ public class Z80ServiceImpl implements Z80Service {
 			case 0xF2:
 				// jp p,**
 				clockCycles = 10;
-				if(registerService.getSignFlag()) {
-					PC += 3;
+				if(!registerService.getSignFlag()) {
+					PC = memoryService.readShort(PC + 1);
 				} else {
-					pointer = memoryService.readShort(PC + 1);
-					PC = pointer;
+					PC += 3;
 				}
 				break;
 
@@ -2745,13 +2738,13 @@ public class Z80ServiceImpl implements Z80Service {
 
 			case 0xF4:
 				// call p,**
-				if(registerService.getSignFlag()) {
-					clockCycles = 10;
-					PC += 3;
-				} else {
+				if(!registerService.getSignFlag()) {
 					clockCycles = 17;
 					push((short)(PC + 3));
 					PC = memoryService.readShort(PC + 1);
+				} else {
+					clockCycles = 10;
+					PC += 3;
 				}
 				break;
 
