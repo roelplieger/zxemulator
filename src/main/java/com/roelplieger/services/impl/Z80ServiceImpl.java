@@ -248,7 +248,7 @@ public class Z80ServiceImpl implements Z80Service {
 
 	private short add(short x, short y) {
 		int result = (x & 0xffff) + (y & 0xffff);
-		registerService.setHalfCarryFlag(((result & 0xfff) + (y & 0xfff) & 0x1000) != 0);
+		registerService.setHalfCarryFlag(((x & 0xfff) + (y & 0xfff) & 0x1000) != 0);
 		registerService.setAddSubtractFlag(false);
 		registerService.setCarryFlag((result & 0x10000) != 0);
 		return (short)(result & 0xffff);
@@ -262,7 +262,7 @@ public class Z80ServiceImpl implements Z80Service {
 		int result = (x & 0xffff) + (y & 0xffff);
 		registerService.setSignFlag((result & 0x8000) != 0);
 		registerService.setZeroFlag((result & 0xffff) == 0);
-		registerService.setHalfCarryFlag(((result & 0xfff) + (y & 0xfff) & 0x1000) != 0);
+		registerService.setHalfCarryFlag(((x & 0xfff) + (y & 0xfff) & 0x1000) != 0);
 		registerService.setParityOverflowFlag(checkAddShortOverflow(x, y, result));
 		registerService.setAddSubtractFlag(false);
 		registerService.setCarryFlag((result & 0x10000) != 0);
@@ -490,7 +490,6 @@ public class Z80ServiceImpl implements Z80Service {
 		// }
 		if(PC == 0x1024) {
 			System.out.println("enter");
-			debug = true;
 		}
 		// if(PC == 0x335e) {
 		// System.out.println("break");
@@ -3210,6 +3209,7 @@ public class Z80ServiceImpl implements Z80Service {
 				registerService.setHalfCarryFlag(false);
 				registerService.setParityOverflowFlag(getParity(b4));
 				registerService.setAddSubtractFlag(false);
+				PC += 2;
 				break;
 
 			case 0x70:
