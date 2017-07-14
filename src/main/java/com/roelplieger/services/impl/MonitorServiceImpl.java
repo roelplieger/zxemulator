@@ -24,6 +24,7 @@ public class MonitorServiceImpl extends JPanel implements MonitorService, KeyLis
 	 * 
 	 */
 	private static final long serialVersionUID = -8872829725467666959L;
+	private static final int BORDCR = 0x5c48;
 	private static final int FLASH_DURATION = 50; // 1 second
 	private static final int[] COLOR_MAP = {
 		0x000000, 0x0000D7, 0xD70000, 0xD700D7, 0x00D700, 0x00D7D7, 0xD7D700, 0xD7D7D7, 0x000000, 0x0000FF, 0xFF0000, 0xFF00FF, 0x00FF00, 0x00FFFF, 0xFFFF00, 0xFFFFFF
@@ -48,7 +49,7 @@ public class MonitorServiceImpl extends JPanel implements MonitorService, KeyLis
 	@Override
 	protected void paintComponent(Graphics g) {
 		try {
-			byte x = (memoryService.readByte(0x5C48));
+			byte x = (memoryService.readByte(BORDCR));
 			/**
 			 * Wait for x to become 56 (bordercolor 7), after that accept border color changes
 			 */
