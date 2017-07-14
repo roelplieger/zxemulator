@@ -15,6 +15,7 @@ public class RegisterServiceImpl implements RegisterService {
 	private static final byte BIT6 = (byte)0b01000000;
 	private static final byte BIT7 = (byte)0b10000000;
 
+	private boolean[] parityLookupTable = new boolean[256];
 	private short AF;
 	private short BC;
 	private short DE;
@@ -32,22 +33,35 @@ public class RegisterServiceImpl implements RegisterService {
 	private byte I;
 	private byte R;
 
+	public RegisterServiceImpl() {
+		buildParityLookupTable();
+	}
+
+	private void buildParityLookupTable() {
+		for(int x = 0; x < 256; x++) {
+			int t = x;
+			t ^= t >> 4;
+			t &= 0x0f;
+			parityLookupTable[x] = (((0x6996 >> t) & 1) == 0);
+		}
+	}
+
 	private byte getHighRegister(short register) {
 		return (byte)(register >>> 8);
 	}
 
 	private short setHighRegister(short register, byte value) {
 		// replace high byte of register with value
-		return (short)((register & 0xFF) + (short)(value << 8));
+		return (short)(((register & 0xff) + (value << 8)) & 0xffff);
 	}
 
 	private byte getLowRegister(short register) {
-		return (byte)(register & 0xFF);
+		return (byte)(register & 0xff);
 	}
 
 	private short setLowRegister(short register, byte value) {
 		// replace lower byte of register with unsigned value
-		return (short)((register & 0xFF00) + (value & 0xFF));
+		return (short)(((register & 0xff00) + (value & 0xff)) & 0xffff);
 	}
 
 	@Override
@@ -357,7 +371,6 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public void setSP(short value) {
-		// System.out.println(String.format("setSP(%x)", value));
 		SP = value;
 	}
 
@@ -413,7 +426,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getSignFlag() {
-		return (AF & BIT7) != 0;
+		return (getF() & BIT7) != 0;
 	}
 
 	@Override
@@ -427,7 +440,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getZeroFlag() {
-		return (AF & BIT6) != 0;
+		return (getF() & BIT6) != 0;
 	}
 
 	@Override
@@ -453,7 +466,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getHalfCarryFlag() {
-		return (AF & BIT4) != 0;
+		return (getF() & BIT4) != 0;
 	}
 
 	@Override
@@ -467,7 +480,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getParityOverflowFlag() {
-		return (AF & BIT2) != 0;
+		return (getF() & BIT2) != 0;
 	}
 
 	@Override
@@ -481,7 +494,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getAddSubtractFlag() {
-		return (AF & BIT1) != 0;
+		return (getF() & BIT1) != 0;
 	}
 
 	@Override
@@ -495,7 +508,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getCarryFlag() {
-		return (AF & BIT0) != 0;
+		return (getF() & BIT0) != 0;
 	}
 
 	@Override
@@ -509,7 +522,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getSignFlag2() {
-		return (AF2 & BIT7) != 0;
+		return (getF2() & BIT7) != 0;
 	}
 
 	@Override
@@ -535,7 +548,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getZeroFlag2() {
-		return (AF2 & BIT6) != 0;
+		return (getF2() & BIT6) != 0;
 	}
 
 	@Override
@@ -549,7 +562,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getHalfCarryFlag2() {
-		return (AF2 & BIT4) != 0;
+		return (getF2() & BIT4) != 0;
 	}
 
 	@Override
@@ -563,7 +576,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getParityOverflowFlag2() {
-		return (AF2 & BIT2) != 0;
+		return (getF2() & BIT2) != 0;
 	}
 
 	@Override
@@ -577,7 +590,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getAddSubtractFlag2() {
-		return (AF2 & BIT1) != 0;
+		return (getF2() & BIT1) != 0;
 	}
 
 	@Override
@@ -591,7 +604,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public boolean getCarryFlag2() {
-		return (AF2 & BIT0) != 0;
+		return (getF2() & BIT0) != 0;
 	}
 
 	@Override
@@ -706,6 +719,15 @@ public class RegisterServiceImpl implements RegisterService {
 			default:
 				throw new MemoryException("Invalid register index: " + register);
 		}
+	}
+
+	@Override
+	public boolean getParity(byte value) {
+		int idx = value;
+		if(idx < 0) {
+			idx += 256;
+		}
+		return parityLookupTable[idx];
 	}
 
 }

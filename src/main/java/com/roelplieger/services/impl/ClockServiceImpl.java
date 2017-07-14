@@ -40,7 +40,9 @@ public class ClockServiceImpl implements ClockService {
 			@Override
 			public void run() {
 				try {
-					z80Service.step();
+					if(active) {
+						z80Service.step();
+					}
 				} catch(Exception e) {
 					e.printStackTrace();
 					active = false;
@@ -50,14 +52,16 @@ public class ClockServiceImpl implements ClockService {
 		Runnable vsyncClock = new Runnable() {
 			@Override
 			public void run() {
-				monitorService.vsync();
-				z80Service.vsync();
+				if(active) {
+					monitorService.vsync();
+					z80Service.vsync();
+				}
 			}
 		};
 
 		z80Service.initialize();
 
-		systemClockService.scheduleAtFixedRate(systemClock, 0, 250, TimeUnit.NANOSECONDS); // ~ 4MHz
+		systemClockService.scheduleAtFixedRate(systemClock, 0, 238, TimeUnit.NANOSECONDS); // ~ 4MHz
 		vsyncClockService.scheduleAtFixedRate(vsyncClock, 0, 20, TimeUnit.MILLISECONDS); // 50Hz
 	}
 

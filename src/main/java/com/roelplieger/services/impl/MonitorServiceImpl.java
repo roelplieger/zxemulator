@@ -2,6 +2,8 @@ package com.roelplieger.services.impl;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JComponent;
@@ -11,16 +13,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.roelplieger.exceptions.MemoryException;
+import com.roelplieger.services.KeyboardService;
 import com.roelplieger.services.MemoryService;
 import com.roelplieger.services.MonitorService;
 
 @Component
-public class MonitorServiceImpl extends JPanel implements MonitorService {
+public class MonitorServiceImpl extends JPanel implements MonitorService, KeyListener {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -8872829725467666959L;
+	private static final int BORDCR = 0x5c48;
 	private static final int FLASH_DURATION = 50; // 1 second
 	private static final int[] COLOR_MAP = {
 		0x000000, 0x0000D7, 0xD70000, 0xD700D7, 0x00D700, 0x00D7D7, 0xD7D700, 0xD7D7D7, 0x000000, 0x0000FF, 0xFF0000, 0xFF00FF, 0x00FF00, 0x00FFFF, 0xFFFF00, 0xFFFFFF
@@ -28,31 +32,39 @@ public class MonitorServiceImpl extends JPanel implements MonitorService {
 	private BufferedImage bi = new BufferedImage(256, 192, BufferedImage.TYPE_INT_RGB);
 	private int flashCounter = FLASH_DURATION;
 	private boolean colorsInverted = false;
+	private int borderColor = 7;
+	private boolean listenForBorderChange = false;
 
 	@Autowired
 	MemoryService memoryService;
+	@Autowired
+	KeyboardService keyboardService;
 
 	public MonitorServiceImpl() {
 		setBounds(0, 0, 256, 192);
+		addKeyListener(this);
+		setFocusable(true);
 	}
 
 	@Override
 	protected void paintComponent(Graphics g) {
 		try {
-			// try {
-			// memoryService.writeByte(0x5800, (byte)0x10);
-			// memoryService.writeByte(0x5801, (byte)0xA0);
-			// memoryService.writeByte(0x4000, (byte)0xff);
-			// memoryService.writeByte(0x4001, (byte)0xff);
-			// memoryService.writeByte(0x4020, (byte)0xff);
-			// memoryService.writeByte(0x4021, (byte)0xff);
-			// memoryService.writeByte(0x4040, (byte)0xff);
-			// memoryService.writeByte(0x4041, (byte)0xff);
-			// memoryService.writeByte(0x4060, (byte)0xff);
-			// memoryService.writeByte(0x4061, (byte)0xff);
-			// } catch(MemoryException e) {
-			// e.printStackTrace();
-			// }
+			byte x = (memoryService.readByte(BORDCR));
+			/**
+			 * Wait for x to become 56 (bordercolor 7), after that accept border color changes
+			 */
+			if(!listenForBorderChange) {
+				if(x == 56) {
+					listenForBorderChange = true;
+				}
+			} else {
+				borderColor = (x - 7 * (0x01 - (x & 0x20) / 0x20)) / 8;
+			}
+		} catch(MemoryException e1) {
+			e1.printStackTrace();
+		}
+		getParent().setBackground(new Color(COLOR_MAP[borderColor]));
+		try {
 			drawCanvas();
 		} catch(MemoryException e) {
 			e.printStackTrace();
@@ -114,4 +126,18 @@ public class MonitorServiceImpl extends JPanel implements MonitorService {
 		repaint();
 	}
 
+	@Override
+	public void keyTyped(KeyEvent e) {
+
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		keyboardService.keyDown(e.getKeyCode());
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		keyboardService.keyUp(e.getKeyCode());
+	}
 }

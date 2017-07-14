@@ -40,7 +40,12 @@ public class MemoryServiceImpl implements MemoryService {
 	public void writeByte(int pointer, byte value) throws MemoryException {
 		pointer = getAbsolutePointer(pointer);
 		checkPointerOutOfRange(pointer);
-		memory[pointer] = value;
+		if(pointer < 0x4000) {
+			// System.out.println("cannot write into ROM! " + pointer);
+			// in SKIP-NEXT at 0x33F8 bytes are 'written' to ROM locations 0 to 4 as 'imaginary stacking'
+		} else {
+			memory[pointer] = value;
+		}
 	}
 
 	private void checkPointerOutOfRange(int pointer) throws MemoryException {
@@ -53,15 +58,19 @@ public class MemoryServiceImpl implements MemoryService {
 	public short readShort(int pointer) throws MemoryException {
 		pointer = getAbsolutePointer(pointer);
 		checkPointerOutOfRange(pointer + 1);
-		return (short)((memory[pointer + 1] << 8) + (memory[pointer] & 0xFF));
+		return (short)(((memory[pointer + 1] << 8) + (memory[pointer] & 0xff)) & 0xffff);
 	}
 
 	@Override
 	public void writeShort(int pointer, short value) throws MemoryException {
 		pointer = getAbsolutePointer(pointer);
 		checkPointerOutOfRange(pointer + 1);
-		memory[pointer + 1] = (byte)(value >>> 8);
-		memory[pointer] = (byte)(value & 0xFF);
+		if(pointer < 0x4000) {
+			// System.out.println("cannot write into ROM! " + pointer);
+		} else {
+			memory[pointer + 1] = (byte)((value >>> 8) & 0xff);
+			memory[pointer] = (byte)(value & 0xff);
+		}
 	}
 
 	@Override

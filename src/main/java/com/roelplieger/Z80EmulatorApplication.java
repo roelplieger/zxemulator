@@ -40,6 +40,7 @@ public class Z80EmulatorApplication extends JFrame {
 
 		setTitle("ZX Spectrum emulator");
 		setSize(286, 252);
+		setResizable(false);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 	}
