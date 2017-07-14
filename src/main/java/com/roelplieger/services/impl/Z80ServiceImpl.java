@@ -14,6 +14,7 @@ import com.roelplieger.exceptions.PortException;
 import com.roelplieger.services.AddressBusService;
 import com.roelplieger.services.KeyboardService;
 import com.roelplieger.services.MemoryService;
+import com.roelplieger.services.MonitorService;
 import com.roelplieger.services.RegisterService;
 import com.roelplieger.services.SoundService;
 import com.roelplieger.services.Z80Service;
@@ -31,6 +32,8 @@ public class Z80ServiceImpl implements Z80Service {
 	KeyboardService keyboardService;
 	@Autowired
 	SoundService soundService;
+	@Autowired
+	MonitorService monitorService;
 
 	private boolean useClockCycles = true;
 	private int clockCycles;
@@ -4702,7 +4705,7 @@ public class Z80ServiceImpl implements Z80Service {
 			addressBusService.registerPort(0xBFFE, keyboardService);
 			addressBusService.registerPort(0x7FFE, keyboardService);
 
-			for(int i = 0; i < 0x20; i++) {
+			for(int i = 0x08; i < 0x20; i++) {
 				addressBusService.registerPort((i << 8) + 0xFE, soundService);
 			}
 		} catch(PortException e) {

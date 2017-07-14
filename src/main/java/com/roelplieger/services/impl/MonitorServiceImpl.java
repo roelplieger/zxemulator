@@ -31,6 +31,8 @@ public class MonitorServiceImpl extends JPanel implements MonitorService, KeyLis
 	private BufferedImage bi = new BufferedImage(256, 192, BufferedImage.TYPE_INT_RGB);
 	private int flashCounter = FLASH_DURATION;
 	private boolean colorsInverted = false;
+	private int borderColor = 7;
+	private boolean listenForBorderChange = false;
 
 	@Autowired
 	MemoryService memoryService;
@@ -46,20 +48,22 @@ public class MonitorServiceImpl extends JPanel implements MonitorService, KeyLis
 	@Override
 	protected void paintComponent(Graphics g) {
 		try {
-			// try {
-			// memoryService.writeByte(0x5800, (byte)0x10);
-			// memoryService.writeByte(0x5801, (byte)0xA0);
-			// memoryService.writeByte(0x4000, (byte)0xff);
-			// memoryService.writeByte(0x4001, (byte)0xff);
-			// memoryService.writeByte(0x4020, (byte)0xff);
-			// memoryService.writeByte(0x4021, (byte)0xff);
-			// memoryService.writeByte(0x4040, (byte)0xff);
-			// memoryService.writeByte(0x4041, (byte)0xff);
-			// memoryService.writeByte(0x4060, (byte)0xff);
-			// memoryService.writeByte(0x4061, (byte)0xff);
-			// } catch(MemoryException e) {
-			// e.printStackTrace();
-			// }
+			byte x = (memoryService.readByte(0x5C48));
+			/**
+			 * Wait for x to become 56 (bordercolor 7), after that accept border color changes
+			 */
+			if(!listenForBorderChange) {
+				if(x == 56) {
+					listenForBorderChange = true;
+				}
+			} else {
+				borderColor = (x - 7 * (0x01 - (x & 0x20) / 0x20)) / 8;
+			}
+		} catch(MemoryException e1) {
+			e1.printStackTrace();
+		}
+		getParent().setBackground(new Color(COLOR_MAP[borderColor]));
+		try {
 			drawCanvas();
 		} catch(MemoryException e) {
 			e.printStackTrace();
@@ -135,5 +139,4 @@ public class MonitorServiceImpl extends JPanel implements MonitorService, KeyLis
 	public void keyReleased(KeyEvent e) {
 		keyboardService.keyUp(e.getKeyCode());
 	}
-
 }
