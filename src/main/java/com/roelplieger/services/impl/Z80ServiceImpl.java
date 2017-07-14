@@ -340,11 +340,7 @@ public class Z80ServiceImpl implements Z80Service {
 			iff1 = false;
 			halted = false;
 
-			if(im == 1) {
-				startInterrupt();
-			} else {
-				System.out.println("im" + im + " not supported");
-			}
+			startInterrupt();
 		}
 
 		if(nextClockCycle() && !waitingForInterrupt()) {
@@ -363,6 +359,10 @@ public class Z80ServiceImpl implements Z80Service {
 			case 1:
 				registerService.setPC((short)0x0038);
 				break;
+			case 2:
+				short table = (short)(registerService.getI() << 8);
+				short vector = memoryService.readShort(table);
+				registerService.setPC(vector);
 			default:
 				break;
 		}
