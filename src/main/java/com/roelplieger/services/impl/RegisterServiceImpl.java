@@ -361,9 +361,6 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public void setPC(short value) {
-		if(value >= 0x4000) {
-			System.out.println("PC >= 0x4000");
-		}
 		PC = value;
 	}
 
@@ -374,7 +371,6 @@ public class RegisterServiceImpl implements RegisterService {
 
 	@Override
 	public void setSP(short value) {
-		// System.out.println(String.format("setSP(%x)", value));
 		SP = value;
 	}
 

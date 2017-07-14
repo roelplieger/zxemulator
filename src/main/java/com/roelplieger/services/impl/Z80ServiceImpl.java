@@ -3606,7 +3606,7 @@ public class Z80ServiceImpl implements Z80Service {
 			default:
 				if(!unknownOps.contains(op)) {
 					unknownOps.add(op);
-					System.out.println(String.format("Unknown operand: %x", op));
+					System.out.println(String.format("Unknown extended operand: %x", op));
 				}
 				break;
 		}
