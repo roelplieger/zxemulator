@@ -4705,7 +4705,7 @@ public class Z80ServiceImpl implements Z80Service {
 			addressBusService.registerPort(0xBFFE, keyboardService);
 			addressBusService.registerPort(0x7FFE, keyboardService);
 
-			for(int i = 0x08; i < 0x20; i++) {
+			for(int i = 0x00; i < 0x20; i++) {
 				addressBusService.registerPort((i << 8) + 0xFE, soundService);
 			}
 		} catch(PortException e) {
