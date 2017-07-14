@@ -17,11 +17,12 @@ import com.roelplieger.services.IOService;
 
 @Service
 public class SoundServiceImpl implements IOService {
-	private final static int BUF_SIZE = 128;
-
+	private final static int BUF_SIZE = 64;
+	private final static long FREQUENCY = 8192;
 	private volatile boolean status;
 	private SourceDataLine line = null;
 	private ScheduledExecutorService soundClockService = Executors.newSingleThreadScheduledExecutor();
+	private final byte[][] buf = new byte[2][BUF_SIZE];
 
 	public SoundServiceImpl() {
 		initSound();
@@ -31,7 +32,7 @@ public class SoundServiceImpl implements IOService {
 	}
 
 	private void initSound() {
-		AudioFormat format = new AudioFormat(8192, 8, 1, false, false);
+		AudioFormat format = new AudioFormat(FREQUENCY, 8, 1, false, false);
 		DataLine.Info info = new DataLine.Info(SourceDataLine.class, format); // format is an AudioFormat object
 		if(AudioSystem.isLineSupported(info)) {
 			try {
@@ -45,7 +46,6 @@ public class SoundServiceImpl implements IOService {
 
 	private void startSound() {
 		Runnable soundClock = new Runnable() {
-			byte[][] buf = new byte[2][BUF_SIZE];
 			int bufIdx = 0;
 			int bufCnt = 0;
 
@@ -60,7 +60,7 @@ public class SoundServiceImpl implements IOService {
 			}
 		};
 
-		soundClockService.scheduleAtFixedRate(soundClock, 0, 122070, TimeUnit.NANOSECONDS); // 8 kHz
+		soundClockService.scheduleAtFixedRate(soundClock, 0, 1000000000L / FREQUENCY, TimeUnit.NANOSECONDS); // 8 kHz
 		line.start();
 	}
 
