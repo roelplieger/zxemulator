@@ -9,11 +9,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
 
 import com.roelplieger.exceptions.PortException;
-import com.roelplieger.services.IOService;
 import com.roelplieger.services.KeyboardService;
 
 @Component
-public class KeyboardServiceImpl implements KeyboardService, IOService {
+public class KeyboardServiceImpl implements KeyboardService {
 
 	private final Set<Integer> keysPressed = new HashSet<>();
 	private final Map<Integer, Map<Integer, Byte>> portKeyMap = new ConcurrentHashMap<Integer, Map<Integer, Byte>>();

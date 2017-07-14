@@ -13,10 +13,10 @@ import javax.sound.sampled.SourceDataLine;
 import org.springframework.stereotype.Service;
 
 import com.roelplieger.exceptions.PortException;
-import com.roelplieger.services.IOService;
+import com.roelplieger.services.SoundService;
 
 @Service
-public class SoundServiceImpl implements IOService {
+public class SoundServiceImpl implements SoundService {
 	private final static int BUF_SIZE = 64;
 	private final static long FREQUENCY = 8192;
 	private volatile boolean status;

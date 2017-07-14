@@ -12,8 +12,10 @@ import org.springframework.stereotype.Component;
 import com.roelplieger.exceptions.MemoryException;
 import com.roelplieger.exceptions.PortException;
 import com.roelplieger.services.AddressBusService;
+import com.roelplieger.services.KeyboardService;
 import com.roelplieger.services.MemoryService;
 import com.roelplieger.services.RegisterService;
+import com.roelplieger.services.SoundService;
 import com.roelplieger.services.Z80Service;
 
 @Component
@@ -26,9 +28,9 @@ public class Z80ServiceImpl implements Z80Service {
 	@Autowired
 	AddressBusService addressBusService;
 	@Autowired
-	KeyboardServiceImpl keyboardService;
+	KeyboardService keyboardService;
 	@Autowired
-	SoundServiceImpl soundService;
+	SoundService soundService;
 
 	private boolean useClockCycles = true;
 	private int clockCycles;

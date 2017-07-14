@@ -1,6 +1,6 @@
 package com.roelplieger.services;
 
-public interface KeyboardService {
+public interface KeyboardService extends IOService {
 
 	void keyDown(int keyCode);
 
