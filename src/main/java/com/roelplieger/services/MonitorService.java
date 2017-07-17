@@ -8,4 +8,5 @@ public interface MonitorService {
 
 	void vsync();
 
+	void setBorderColor(int color);
 }

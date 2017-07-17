@@ -13,7 +13,7 @@ import com.roelplieger.services.MemoryService;
 @Component
 public class MemoryServiceImpl implements MemoryService {
 
-	private final static int MEM_SIZE = 48 * 1024 * 1024;
+	private final static int MEM_SIZE = 64 * 1024 * 1024;
 	private byte[] memory = new byte[MEM_SIZE];
 
 	/**
@@ -58,7 +58,7 @@ public class MemoryServiceImpl implements MemoryService {
 	public short readShort(int pointer) throws MemoryException {
 		pointer = getAbsolutePointer(pointer);
 		checkPointerOutOfRange(pointer + 1);
-		return (short)(((memory[pointer + 1] << 8) + (memory[pointer] & 0xff)) & 0xffff);
+		return (short)((((memory[pointer + 1] & 0xff) << 8) + (memory[pointer] & 0xff)) & 0xffff);
 	}
 
 	@Override

@@ -10,4 +10,6 @@ public interface Z80Service {
 	void vsync();
 
 	void initialize();
+
+	void setIM(int im, boolean iff2);
 }

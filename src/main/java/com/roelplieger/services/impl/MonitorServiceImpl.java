@@ -63,7 +63,9 @@ public class MonitorServiceImpl extends JPanel implements MonitorService, KeyLis
 		} catch(MemoryException e1) {
 			e1.printStackTrace();
 		}
-		getParent().setBackground(new Color(COLOR_MAP[borderColor]));
+		if(borderColor >= 0 && borderColor < 8) {
+			getParent().setBackground(new Color(COLOR_MAP[borderColor]));
+		}
 		try {
 			drawCanvas();
 		} catch(MemoryException e) {
@@ -139,5 +141,15 @@ public class MonitorServiceImpl extends JPanel implements MonitorService, KeyLis
 	@Override
 	public void keyReleased(KeyEvent e) {
 		keyboardService.keyUp(e.getKeyCode());
+	}
+
+	@Override
+	public void setBorderColor(int color) {
+		byte bc = (byte)(7 * (0x01 - (color & 0x20) / 0x20) + color * 8);
+		try {
+			memoryService.writeByte(BORDCR, bc);
+		} catch(MemoryException e) {
+			e.printStackTrace();
+		}
 	}
 }
