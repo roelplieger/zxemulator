@@ -4,5 +4,6 @@ public interface ClockService {
 
 	void start();
 
-	void stop();
+	void setActive(boolean active);
+
 }

@@ -86,7 +86,7 @@ public class KeyboardServiceImpl implements KeyboardService {
 
 	@Override
 	public byte in(int port) throws PortException {
-		Map<Integer, Byte> keyMap = portKeyMap.get(port);
+		Map<Integer, Byte> keyMap = portKeyMap.get(port & 0xffff);
 		byte keys = 0x00;
 
 		for(int keyCode: keysPressed) {

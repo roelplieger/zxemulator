@@ -2,12 +2,17 @@ package com.roelplieger;
 
 import java.awt.Container;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 
 import javax.swing.GroupLayout;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,6 +23,7 @@ import com.roelplieger.exceptions.MemoryException;
 import com.roelplieger.services.ClockService;
 import com.roelplieger.services.MemoryService;
 import com.roelplieger.services.MonitorService;
+import com.roelplieger.services.Z80LoaderService;
 
 @SpringBootApplication
 public class Z80EmulatorApplication extends JFrame {
@@ -33,16 +39,39 @@ public class Z80EmulatorApplication extends JFrame {
 	MemoryService memoryService;
 	@Autowired
 	ClockService clockService;
+	@Autowired
+	Z80LoaderService z80LoaderService;
 
 	private void initUI() {
 
 		createLayout(monitorService.getInstance());
 
 		setTitle("ZX Spectrum emulator");
-		setSize(286, 252);
+		setSize(286, 272);
 		setResizable(false);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+		JMenuBar menu = new JMenuBar();
+		JMenu fileMenu = new JMenu("File");
+		JMenuItem loadZ80 = new JMenuItem("Load .z80");
+		loadZ80.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				z80LoaderService.loadAndStartZ80();
+			}
+		});
+		fileMenu.add(loadZ80);
+		JMenuItem loadBin = new JMenuItem("Load binary");
+		loadBin.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				z80LoaderService.loadAndStartBinary();
+			}
+		});
+		fileMenu.add(loadBin);
+		menu.add(fileMenu);
+		setJMenuBar(menu);
 	}
 
 	private void createLayout(JComponent... arg) {

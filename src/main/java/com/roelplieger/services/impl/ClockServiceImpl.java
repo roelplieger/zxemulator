@@ -19,19 +19,10 @@ public class ClockServiceImpl implements ClockService {
 	@Autowired
 	MonitorService monitorService;
 
-	private boolean active;
+	private volatile boolean active;
 
 	private ScheduledExecutorService systemClockService = Executors.newSingleThreadScheduledExecutor();
 	private ScheduledExecutorService vsyncClockService = Executors.newSingleThreadScheduledExecutor();
-
-	@Override
-	public void stop() {
-		if(active) {
-			systemClockService.shutdown();
-			vsyncClockService.shutdown();
-		}
-		active = false;
-	}
 
 	@Override
 	public void start() {
@@ -63,6 +54,11 @@ public class ClockServiceImpl implements ClockService {
 
 		systemClockService.scheduleAtFixedRate(systemClock, 0, 238, TimeUnit.NANOSECONDS); // ~ 4MHz
 		vsyncClockService.scheduleAtFixedRate(vsyncClock, 0, 20, TimeUnit.MILLISECONDS); // 50Hz
+	}
+
+	@Override
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 
 }
