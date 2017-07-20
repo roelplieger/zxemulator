@@ -2423,7 +2423,7 @@ public class Z80ServiceImpl implements Z80Service {
 				// out (*),a
 				clockCycles = 11;
 				A = registerService.getA();
-				int port = (A << 8) + memoryService.readByte(PC + 1);
+				int port = ((A << 8) & 0xffff) + (memoryService.readByte(PC + 1) & 0xff);
 				addressBusService.out(port, A);
 				PC += 2;
 				break;
@@ -2507,7 +2507,7 @@ public class Z80ServiceImpl implements Z80Service {
 				// in a,(*)
 				clockCycles = 11;
 				A = registerService.getA();
-				port = (A << 8) + memoryService.readByte(PC + 1);
+				port = ((A << 8) & 0xffff) + memoryService.readByte(PC + 1);
 				A = addressBusService.in(port);
 				registerService.setA(A);
 				PC++;
