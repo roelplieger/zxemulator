@@ -328,7 +328,7 @@ public class Z80ServiceImpl implements Z80Service {
 
 	@Override
 	public void step() throws MemoryException, PortException {
-		if(!debug && execInterrupt) {
+		if(execInterrupt) {
 			execInterrupt = false;
 
 			startInterrupt();
@@ -346,20 +346,22 @@ public class Z80ServiceImpl implements Z80Service {
 
 	private void startInterrupt() throws MemoryException {
 		if(im != 0) {
-			interruptRunning = true;
 			iff1 = false;
 			halted = false;
-			push(registerService.getPC());
-			switch (im) {
-				case 1:
-					registerService.setPC((short)0x0038);
-					break;
-				case 2:
-					short table = (short)(registerService.getI() << 8);
-					short vector = memoryService.readShort(table);
-					registerService.setPC(vector);
-				default:
-					break;
+			if(!debug) {
+				interruptRunning = true;
+				push(registerService.getPC());
+				switch (im) {
+					case 1:
+						registerService.setPC((short)0x0038);
+						break;
+					case 2:
+						short table = (short)(registerService.getI() << 8);
+						short vector = memoryService.readShort(table);
+						registerService.setPC(vector);
+					default:
+						break;
+				}
 			}
 		}
 	}
@@ -4862,7 +4864,7 @@ public class Z80ServiceImpl implements Z80Service {
 	@Override
 	public void setIM(int im, boolean iff1) {
 		if(im == 0) {
-			im = 1;
+			 im = 1;
 		}
 		this.im = im;
 		this.iff1 = iff1;
