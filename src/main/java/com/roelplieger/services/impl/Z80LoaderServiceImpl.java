@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.roelplieger.exceptions.MemoryException;
 import com.roelplieger.services.ClockService;
 import com.roelplieger.services.MemoryService;
+import com.roelplieger.services.MonitorService;
 import com.roelplieger.services.RegisterService;
 import com.roelplieger.services.Z80LoaderService;
 import com.roelplieger.services.Z80Service;
@@ -41,6 +42,8 @@ public class Z80LoaderServiceImpl implements Z80LoaderService {
 	MemoryService memoryService;
 	@Autowired
 	Z80Service z80Service;
+	@Autowired
+	MonitorService monitorService;
 
 	@Override
 	public void loadAndStartZ80() {
@@ -92,6 +95,9 @@ public class Z80LoaderServiceImpl implements Z80LoaderService {
 		if((m12 & 0x01) != 0) {
 			R |= 0x80;
 		}
+		int borderColor = (m12 >> 1) & 0x07;
+		monitorService.setBorderColor(borderColor);
+
 		registerService.setR(R);
 		compressed = (m12 & 0x20) != 0;
 		registerService.setDE(readShort(13));
@@ -167,7 +173,7 @@ public class Z80LoaderServiceImpl implements Z80LoaderService {
 		try {
 			memory = Files.readAllBytes(file.toPath());
 			InputStream is = new ByteArrayInputStream(memory);
-			memoryService.loadInputStream(0x4000, is);
+			memoryService.loadInputStream(0x8000, is);
 			is.close();
 			resetZ80State();
 		} catch(IOException | MemoryException e) {
