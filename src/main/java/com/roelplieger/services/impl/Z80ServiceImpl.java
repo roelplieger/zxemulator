@@ -4842,17 +4842,17 @@ public class Z80ServiceImpl implements Z80Service {
 	@Override
 	public void initialize() {
 		try {
-			addressBusService.registerPort(0xFEFE, keyboardService);
-			addressBusService.registerPort(0xFDFE, keyboardService);
-			addressBusService.registerPort(0xFBFE, keyboardService);
-			addressBusService.registerPort(0xF7FE, keyboardService);
-			addressBusService.registerPort(0xEFFE, keyboardService);
-			addressBusService.registerPort(0xDFFE, keyboardService);
-			addressBusService.registerPort(0xBFFE, keyboardService);
-			addressBusService.registerPort(0x7FFE, keyboardService);
+			addressBusService.registerPort(0xFEFE, keyboardService, true);
+			addressBusService.registerPort(0xFDFE, keyboardService, true);
+			addressBusService.registerPort(0xFBFE, keyboardService, true);
+			addressBusService.registerPort(0xF7FE, keyboardService, true);
+			addressBusService.registerPort(0xEFFE, keyboardService, true);
+			addressBusService.registerPort(0xDFFE, keyboardService, true);
+			addressBusService.registerPort(0xBFFE, keyboardService, true);
+			addressBusService.registerPort(0x7FFE, keyboardService, true);
 
 			for(int i = 0x00; i < 0x20; i++) {
-				addressBusService.registerPort((i << 8) + 0xFE, soundService);
+				addressBusService.registerPort((i << 8) + 0xFE, soundService, false);
 			}
 		} catch(PortException e) {
 			e.printStackTrace();

@@ -17,18 +17,21 @@ import com.roelplieger.services.SoundService;
 
 @Service
 public class SoundServiceImpl implements SoundService {
-	private final static int BUF_SIZE = 64;
+	private final static int BUF_SIZE = 256;
 	private final static long FREQUENCY = 8192;
 	private volatile boolean status;
 	private SourceDataLine line = null;
 	private ScheduledExecutorService soundClockService = Executors.newSingleThreadScheduledExecutor();
 	private final byte[][] buf = new byte[2][BUF_SIZE];
+	private int bufIdx = 0;
 
 	public SoundServiceImpl() {
 		initSound();
 		if(line != null) {
-			startSound();
+			line.start();
+//			startSound();
 		}
+
 	}
 
 	private void initSound() {
@@ -51,9 +54,9 @@ public class SoundServiceImpl implements SoundService {
 
 			@Override
 			public void run() {
-				buf[bufIdx][bufCnt++] = (byte)((status) ? 0x80 : 0x00);
+				buf[0][bufCnt++] = (byte)((status) ? 0x80 : 0x00);
 				if(bufCnt == BUF_SIZE) {
-					line.write(buf[bufIdx], 0, BUF_SIZE);
+					line.write(buf[0], 0, BUF_SIZE);
 					bufIdx = (bufIdx + 1) % 2;
 					bufCnt = 0;
 				}
@@ -72,6 +75,12 @@ public class SoundServiceImpl implements SoundService {
 	@Override
 	public void out(int port, byte value) throws PortException {
 		status = (value & 0x10) != 0;
+		buf[0][bufIdx++] = (byte)((status) ? 0x80 : 0x00);
+		if(bufIdx == BUF_SIZE) {
+			line.write(buf[0], 0, BUF_SIZE);
+			bufIdx = 0;
+		}
+//		System.out.println(port + " - " + value);
 	}
 
 }

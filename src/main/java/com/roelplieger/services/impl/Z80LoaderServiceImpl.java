@@ -33,14 +33,21 @@ public class Z80LoaderServiceImpl implements Z80LoaderService {
 	private int startOfMemory = 30; // for version 1
 	private boolean compressed = false;
 
-	@Autowired
+	final
 	ClockService clockService;
-	@Autowired
+	final
 	RegisterService registerService;
-	@Autowired
+	final
 	MemoryService memoryService;
-	@Autowired
+	final
 	Z80Service z80Service;
+
+	public Z80LoaderServiceImpl(ClockService clockService, RegisterService registerService, MemoryService memoryService, Z80Service z80Service) {
+		this.clockService = clockService;
+		this.registerService = registerService;
+		this.memoryService = memoryService;
+		this.z80Service = z80Service;
+	}
 
 	@Override
 	public void loadAndStartZ80() {
@@ -119,14 +126,14 @@ public class Z80LoaderServiceImpl implements Z80LoaderService {
 		int i = startOfMemory;
 		if(compressed) {
 			while(i < memory.length) {
-				byte b = memory[i];
+				Byte b = Byte.valueOf(memory[i]);
 				if((b & 0xff) == 0x00 && (memory[i + 1] & 0xff) == 0xed && (memory[i + 2] & 0xff) == 0xed && (memory[i + 3] & 0xff) == 0x00) {
 					// version 1 EOF
 					break;
 				}
 				if((b & 0xff) == 0xed && (memory[i + 1] & 0xff) == 0xed) {
 					int count = (memory[i + 2] & 0xff);
-					byte value = memory[i + 3];
+					Byte value = Byte.valueOf(memory[i + 3]);
 					while(count-- > 0) {
 						tmp.add(value);
 					}
@@ -138,7 +145,7 @@ public class Z80LoaderServiceImpl implements Z80LoaderService {
 			}
 		} else {
 			for(i = startOfMemory; i < memory.length; i++) {
-				tmp.add(memory[i]);
+				tmp.add(Byte.valueOf(memory[i]));
 			}
 		}
 		byte[] mem = new byte[tmp.size()];
@@ -177,7 +184,7 @@ public class Z80LoaderServiceImpl implements Z80LoaderService {
 	}
 
 	private void resetZ80State() {
-		z80Service.setIM(0, false);
+//		z80Service.setIM(0, false);
 		registerService.setAF((short)0);
 		registerService.setBC((short)0);
 		registerService.setDE((short)0);
