@@ -261,13 +261,10 @@ public class Z80ServiceImpl implements Z80Service {
 
 	private short adc(short x, short y) {
 		boolean CFlag = registerService.getCarryFlag();
-		if(CFlag) {
-			y++;
-		}
-		int result = (x & 0xffff) + (y & 0xffff);
+		int result = (x & 0xffff) + (y & 0xffff) + (CFlag ? 1 : 0);
 		registerService.setSignFlag((result & 0x8000) != 0);
 		registerService.setZeroFlag((result & 0xffff) == 0);
-		registerService.setHalfCarryFlag(((x & 0xfff) + (y & 0xfff) & 0x1000) != 0);
+		registerService.setHalfCarryFlag((((x & 0xFFF) + (y & 0xFFF) + (CFlag ? 1 : 0)) & 0x1000) != 0);
 		registerService.setParityOverflowFlag(checkAddShortOverflow(x, y, result));
 		registerService.setAddSubtractFlag(false);
 		registerService.setCarryFlag((result & 0x10000) != 0);
@@ -276,13 +273,10 @@ public class Z80ServiceImpl implements Z80Service {
 
 	private short sbc(short x, short y) {
 		boolean CFlag = registerService.getCarryFlag();
-		if(CFlag) {
-			y++;
-		}
-		int result = (x & 0xffff) - (y & 0xffff);
+		int result = (x & 0xffff) - (y & 0xffff) - (CFlag ? 1 : 0);
 		registerService.setSignFlag((result & 0x8000) != 0);
 		registerService.setZeroFlag((result & 0xffff) == 0);
-		registerService.setHalfCarryFlag(((x & 0xfff) - (y & 0xfff) & 0x1000) != 0);
+		registerService.setHalfCarryFlag((((x & 0xFFF) - (y & 0xFFF) - (CFlag ? 1 : 0)) & 0x1000) != 0);
 		registerService.setParityOverflowFlag(checkSubShortOverflow(x, y, result));
 		registerService.setAddSubtractFlag(true);
 		registerService.setCarryFlag((result & 0x10000) != 0);
@@ -869,39 +863,30 @@ public class Z80ServiceImpl implements Z80Service {
 				break;
 
 			case 0x27:
-				// daa - see http://stackoverflow.com/questions/8119577/z80-daa-instruction
+				// daa
 				clockCycles = 4;
-				boolean NFlag = registerService.getAddSubtractFlag(); // false=ADD, true=SUB
-				boolean HCFlag = registerService.getHalfCarryFlag();
+				byte a = registerService.getA();
+				int a_int = a & 0xFF;
+				int correction = 0;
 				boolean CFlag = registerService.getCarryFlag();
-				A = registerService.getA();
-				byte tmp = A;
-				byte cor1 = 0;
-				byte cor2 = 0;
-				if((A & 0x0f) > 9 || HCFlag) {
-					if(NFlag) {
-						cor1 = -0x06;
-					} else {
-						cor1 = 0x06;
-					}
-					A += cor1;
+				if ((a_int & 0x0F) > 9 || registerService.getHalfCarryFlag()) {
+					correction |= 0x06;
 				}
-				if(((A & 0xff) >>> 4) > 9 || CFlag) {
-					if(NFlag) {
-						cor2 = -0x60;
-					} else {
-						cor2 = 0x60;
-					}
-					A += cor2;
-					registerService.setCarryFlag(true);
+				if (a_int > 0x99 || CFlag) {
+					correction |= 0x60;
+					CFlag = true;
+				}
+				if (registerService.getAddSubtractFlag()) {
+					a_int -= correction;
 				} else {
-					registerService.setCarryFlag(false);
+					a_int += correction;
 				}
-				registerService.setHalfCarryFlag((((tmp & 0xf) + ((cor1 + cor2) & 0xf)) & 0x10) != 0);
-				registerService.setA(A);
-				registerService.setParityOverflowFlag(getParity(A));
-				registerService.setZeroFlag(A == 0);
-				registerService.setSignFlag((A & 0x80) != 0);
+				registerService.setA((byte) a_int);
+				registerService.setCarryFlag(CFlag);
+				registerService.setHalfCarryFlag(((a & 0x10) ^ ((byte) a_int & 0x10)) != 0);
+				registerService.setSignFlag((a_int & 0x80) != 0);
+				registerService.setZeroFlag((a_int & 0xFF) == 0);
+				registerService.setParityOverflowFlag(getParity((byte) a_int));
 				PC++;
 				break;
 
